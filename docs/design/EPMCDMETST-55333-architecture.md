@@ -1,98 +1,84 @@
-# EPMCDMETST-55333 — Architecture Document – Change Password
+# EPMCDMETST-55333 — Architecture Document (Change Password)
 
 ## Overview
-This enhancement adds authenticated password change capability in the existing Conduit (RealWorld) application.
+This enhancement adds a secure **Change Password** flow for authenticated users.
 
-**User goal:** An authenticated user can change their password in **Settings**.
-**Backend capability:** New endpoint `PUT /api/user/password` that:
-- Requires JWT authentication
-- Verifies `currentPassword`
-- Validates `confirmPassword`
-- Updates the stored password hash
-- Returns the **full user object with a fresh token**, same response shape as `PUT /api/user`
+- **Frontend**: Settings page gets a new “Change Password” section with current/new/confirm fields and a Save action.
+- **Backend**: Adds a **JWT-protected** endpoint `PUT /api/user/password` that verifies the current password and updates the stored password hash.
 
-## Context in existing system
-The Conduit application already includes:
-- SPA frontend with a Settings page used for user profile updates
-- Backend API following RealWorld patterns (`/api/user`, `/api/users/login`, etc.)
-- JWT auth middleware
-- User persistence with hashed passwords and login verification
+This design follows existing RealWorld/Conduit patterns: REST JSON API, JWT auth middleware, and password hashing with the same crypto strategy used in register/login.
 
-This story extends the existing “user/account” slice with a dedicated password-change endpoint and a corresponding Settings UI section.
+## Goals
+- Allow authenticated users to change their password from Settings.
+- Require the **current password** to prevent unauthorized changes.
+- Enforce basic validation and deliver user-friendly errors.
 
-## Key architectural decisions
-1. **Dedicated endpoint (`PUT /api/user/password`)**
-   - Keeps password change concerns separate from the existing profile update endpoint.
-   - Allows stricter validation and targeted error reporting without impacting profile updates.
+## Non-goals
+- Token/session invalidation or forced re-login (JWT is typically stateless in this codebase).
+- Password strength rules beyond basic minimums unless already present.
 
-2. **Reuse existing auth + hashing**
-   - JWT verification uses existing auth middleware.
-   - Password hashing and comparison reuses the same mechanisms as login/registration.
+## System context
+### Key flows
+1. User opens **Settings** page.
+2. User enters current password, new password, and confirmation.
+3. Frontend validates and sends `PUT /api/user/password` with JWT.
+4. Backend authenticates JWT, verifies current password, hashes new password, persists user.
+5. UI clears fields and shows success, or displays errors.
 
-3. **Fresh token on success**
-   - On successful password update, the API returns the same user response shape as `PUT /api/user`, including a **newly issued JWT** (fresh token).
-
-4. **Validation strategy**
-   - Client-side validation for usability.
-   - Server-side validation for correctness/security, including `confirmPassword`.
-
-5. **No schema changes**
-   - Password change updates the existing password hash field in the `users` table/collection.
-
-
-## Component diagram (Mermaid)
+## Component diagram
 ```mermaid
 flowchart LR
-  subgraph Browser["Browser"]
-    User["Authenticated User"]
+  subgraph Client["Browser / SPA Client"]
+    SettingsPage["Settings Page
+Change Password Section"]
+    ApiClient["API Client
+(fetch/axios wrapper)"]
+    SettingsPage -->|"PUT /api/user/password"| ApiClient
   end
 
-  subgraph FE["Frontend SPA"]
-    SettingsUI["Settings Page\nChange Password Section"]
-    ApiClient["API Client\n(fetch/axios wrapper)"]
-  end
+  subgraph Server["Backend API"]
+    Router["User Router
+/api/user"]
+    AuthMW["JWT Auth Middleware"]
+    UserController["User Controller
+changePassword()"]
+    UserService["User Service
+changePassword()"]
+    Crypto["Password Crypto
+(bcrypt compare/hash)"]
+    UserRepo["User Repository/ORM
+User model"]
 
-  subgraph BE["Backend API"]
-    Router["Router\nPUT /api/user/password"]
-    AuthMW["Auth Middleware\nZWT verify -> req.user"]
-    UserController["User Controller\nchangePassword()"]
-    UserService["User Service\nverifyAndUpdatePassword()"]
-    TokenService["Token Service\nissueFreshToken()"]
-    PasswordHasher["Password Hasher\ncompare/hash (bcrypt, etc.)"]
-    Validator["Validation Layer\npayload + rules"]
+    Router --> AuthMW --> UserController --> UserService
+    UserService --> Crypto
+    UserService --> UserRepo
   end
 
   subgraph DB["Database"]
-    Users["Users store\n(password_hash)"]
+    UsersTable["users table
+(password_hash, email, …)"]
   end
 
-  User --> SettingsUI
-  SettingsUI.--> ApiClient
   ApiClient --> Router
-  Router --> AuthMW
-  AuthMW --> Validator
-  Validator --> UserController
-  UserController --> UserService
-  UserService --> PasswordHasher
-  UserService --> Users
-  UserService --> TokenService
-  TokenService --> UserController
-  UserController --> Router
+  UserRepo --> UsersTable
 ```
 
-## Technology choices and constraints
-- **Authentication:** JWT Bearer token in `Authorization` header (RealWorld convention: `Token <jwt>`).
-- **Password hashing:** reuse existing hashing library already used by login/registration (typically bcrypt/bcryptjs or framework equivalent).
-m, **Validation:** reuse existing request validation patterns in the backend (middleware or controller-level checks).
-- **Response contract:** same shape as the existing `PUT /api/user` response (includes `oken`).
-- **Security considerations:**
-  - Never log passwords.
-  - Return field-based validation errors in standard RealWorld `{ errors: { field: [messages] } }` format.
-  - Use generic “incorrect current password” error without revealing details.
-  - Token rotation: always issue a fresh token after password change.
+## Technology & conventions
+- **Auth**: Reuse existing JWT middleware (`auth.required` or equivalent).
+- **Crypto**: Reuse existing password hashing/verification functions (e.g., bcrypt).
+- **Persistence**: Update existing user record’s password hash using existing ORM/model conventions.
+- **API payload**: Use wrapped RealWorld style request/response objects.
 
-## Non-goals
-- Password reset via email (forgot password)
-- MFA
-- Session invalidation across devices (unless already supported by token revocation)
-- Additional password complexity beyond existing registration policy
+## Security considerations
+- Endpoint requires a valid JWT.
+- Verify `currentPassword` using bcrypt compare (or existing helper).
+- Hash `newPassword` with the same strategy (salt rounds/cost) as registration.
+- Do not return password hashes.
+- Return a **422** error for “current password incorrect” with a field-level error payload:
+  ```json
+  { "errors": { "currentPassword": ["is incorrect"] } }
+  ```
+
+## Observability
+- Log only high-level events (success/failure) without including passwords.
+- Surface backend validation errors to UI in a consistent field-error format.
