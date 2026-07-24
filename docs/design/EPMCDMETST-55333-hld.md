@@ -25,7 +25,8 @@ Use wrapped request body:
 ```
 
 ### Success response
-Return the standard RealWorld user view (no password fields):
+Return the standard RealWorld user view (no password fields). **Token behavior matches the existing** `PUT /api/user` **implementation** in this codebase: the response returns the user object with the **existing JWT token unchanged** (the token is copied from the `Authorization` header by auth middleware; it is not re-signed during password change).
+
 ```json
 {
   "user": {
