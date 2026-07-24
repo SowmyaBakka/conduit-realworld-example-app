@@ -32,9 +32,11 @@ Files changed in that commit:
 Also updated:
 - `docs/design/EPMCDMETST-55333-hld.md` (token behavior alignment, per Jira comment)
 
-Verified Jira note on the **task** (EPMCDMETST-55334) comments:
-- No explicit test-gap note.
-- There *is* a reminder that local-only env modifications were left uncommitted: `backend/config/config.js`, `package.json`.
+Verified Jira notes on the **task** (EPMCDMETST-55334) comments:
+- Retroactively documented test gap (added later than the original code-stage comment):
+  - **Pre-existing Vitest config issue found during Code stage verification (test discovery fails before running, across all test files including ones unrelated to this Task's changes) — flagged as a gap for the Testing stage, not caused by this Task's changes.**
+  - Evidence: Jira comment **15792371** on **EPMCDMETST-55334**
+- Reminder that local-only env modifications were left uncommitted: `backend/config/config.js`, `package.json`.
 
 > Note: Frontend task (EPMCDMETST-55335) is **not implemented** on this branch based on the commit history checked.
 
@@ -57,6 +59,7 @@ From repo root:
   ```
 
 ## Known gaps / follow-ups (from Jira + repo checks)
+- **Vitest test discovery fails before running** (pre-existing; not caused by EPMCDMETST-55334 changes). This was retroactively documented to Jira in comment **15792371** on **EPMCDMETST-55334**.
 - **Frontend UI** for Change Password is not present yet (task EPMCDMETST-55335 remains Open in Jira and no corresponding frontend commits were found on this branch).
 - **README** was not updated for this feature (repo README remains generic / project-level).
 
@@ -64,6 +67,7 @@ From repo root:
 
 ## Evidence: commits on this branch
 - `215d953` docs(summary): add story summary (EPMCDMETST-55333)
+- `ac93e86` docs(summary): verify task comments for test gaps (EPMCDMETST-55333)
 - `02ec223` feat(user): add change password endpoint (EPMCDMETST-55334)
 - `dcc3902` docs(design): add EPMCDMETST-55333 design docs
 - `85b98aa` docs(EPMCDMETST-55333): add high-level design
