@@ -7,7 +7,7 @@ module.exports = {
     host: process.env.DEV_DB_HOSTNAME,
     port: process.env.DEV_DB_PORT,
     dialect: process.env.DEV_DB_DIALECT,
-    logging: process.env.DEV_DB_LOGGING,
+    logging: process.env.DEV_DB_LOGGING === 'true' ? console.log : false,
   },
   test: {
     username: process.env.TEST_DB_USERNAME,
