@@ -32,7 +32,11 @@ Files changed in that commit:
 Also updated:
 - `docs/design/EPMCDMETST-55333-hld.md` (token behavior alignment, per Jira comment)
 
-> Note: Frontend task (EPMCDMETST-55335) is **not implemented** on this branch based on the commit history checked (see “Compliance Summary”).
+Verified Jira note on the **task** (EPMCDMETST-55334) comments:
+- No explicit test-gap note.
+- There *is* a reminder that local-only env modifications were left uncommitted: `backend/config/config.js`, `package.json`.
+
+> Note: Frontend task (EPMCDMETST-55335) is **not implemented** on this branch based on the commit history checked.
 
 ## How to run / test locally (from repo scripts)
 From repo root:
@@ -59,6 +63,7 @@ From repo root:
 ---
 
 ## Evidence: commits on this branch
+- `215d953` docs(summary): add story summary (EPMCDMETST-55333)
 - `02ec223` feat(user): add change password endpoint (EPMCDMETST-55334)
 - `dcc3902` docs(design): add EPMCDMETST-55333 design docs
 - `85b98aa` docs(EPMCDMETST-55333): add high-level design
