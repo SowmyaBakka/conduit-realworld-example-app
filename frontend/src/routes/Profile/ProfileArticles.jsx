@@ -1,7 +1,9 @@
 import { useParams } from "react-router-dom";
 import ArticlesPagination from "../../components/ArticlesPagination";
 import ArticlesPreview from "../../components/ArticlesPreview";
+import ArticleListSearch from "../../components/ArticleListSearch";
 import useArticleList from "../../hooks/useArticles";
+import useArticleListSearch from "../../hooks/useArticleListSearch";
 
 function ProfileArticles() {
   const { username } = useParams();
@@ -11,24 +13,43 @@ function ProfileArticles() {
     username,
   });
 
+  const { query, setQuery, visibleArticles, isSearching } = useArticleListSearch(articles);
+
   return loading ? (
     <div className="article-preview">
       <em>Loading {username} articles...</em>
     </div>
   ) : articles.length > 0 ? (
     <>
-      <ArticlesPreview
-        articles={articles}
-        loading={loading}
-        updateArticles={setArticlesData}
+      <ArticleListSearch
+        value={query}
+        onChange={setQuery}
+        placeholder="Search articles..."
       />
 
-      <ArticlesPagination
-        articlesCount={articlesCount}
-        location="profile"
-        updateArticles={setArticlesData}
-        username={username}
-      />
+      {visibleArticles.length > 0 ? (
+        <>
+          <ArticlesPreview
+            articles={visibleArticles}
+            loading={loading}
+            updateArticles={setArticlesData}
+            highlightQuery={query}
+          />
+
+          {!isSearching && (
+            <ArticlesPagination
+              articlesCount={articlesCount}
+              location="profile"
+              updateArticles={setArticlesData}
+              username={username}
+            />
+          )}
+        </>
+      ) : (
+        <div className="article-list-empty" data-testid="article-list-empty">
+          No articles match your search.
+        </div>
+      )}
     </>
   ) : (
     <div className="article-preview">{username} doesn't have articles.</div>
