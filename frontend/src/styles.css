@@ -1524,3 +1524,31 @@ footer > .container {
   margin-right: 5px;
   cursor: pointer;
 }
+
+/* ============================================================================
+ * ARTICLE LIST SEARCH (EPMCDMETST-58005)
+ * ============================================================================ */
+
+.article-list-search {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.article-list-search input {
+  flex: 1;
+}
+
+mark {
+  background: #fff3cd;
+  padding: 0 0.1rem;
+  font-weight: 500;
+}
+
+.article-list-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+}
