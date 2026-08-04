@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
 import ArticleMeta from "../ArticleMeta";
 import ArticleTags from "../ArticleTags";
 import FavButton from "../FavButton";
+import { highlightMatches } from "../../helpers/highlightMatches";
 
-function ArticlesPreview({ articles, loading, updateArticles }) {
+function ArticlesPreview({ articles, loading, updateArticles, highlightQuery = '' }) {
   const handleFav = (article) => {
     const items = [...articles];
 
@@ -32,8 +34,8 @@ function ArticlesPreview({ articles, loading, updateArticles }) {
             state={article}
             className="preview-link"
           >
-            <h1>{article.title}</h1>
-            <p>{article.description}</p>
+            <h1>{highlightQuery ? highlightMatches(article.title, highlightQuery) : article.title}</h1>
+            <p>{highlightQuery ? highlightMatches(article.description, highlightQuery) : article.description}</p>
             <span>Read more...</span>
             <ArticleTags tagList={article.tagList} />
           </Link>
@@ -46,5 +48,12 @@ function ArticlesPreview({ articles, loading, updateArticles }) {
     <div className="article-preview">No articles available.</div>
   );
 }
+
+ArticlesPreview.propTypes = {
+  articles: PropTypes.array.isRequired,
+  loading: PropTypes.bool.isRequired,
+  updateArticles: PropTypes.func.isRequired,
+  highlightQuery: PropTypes.string,
+};
 
 export default ArticlesPreview;
