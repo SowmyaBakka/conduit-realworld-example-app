@@ -1,6 +1,7 @@
 import ReactPaginate from "react-paginate";
-import { useAuth } from "../../context/AuthContext";
-import getArticles from "../../services/getArticles";
+import { useSearchParams } from "react-router-dom";
+import { useFeedContext } from "../../context/FeedContext";
+import { toSearchParams } from "../../helpers/homeFeedQuery";
 
 function ArticlesPagination({
   articlesCount,
@@ -10,12 +11,17 @@ function ArticlesPagination({
   username,
 }) {
   const totalPages = Math.ceil(articlesCount / 3);
-  const { headers } = useAuth();
+  const [, setSearchParams] = useSearchParams();
+  const { tabName, tagName: contextTagName, pageIndex } = useFeedContext();
 
-  const handlePageChange = ({ selected: page }) => {
-    getArticles({ headers, location, page, username, tagName })
-      .then(updateArticles)
-      .catch(console.error);
+  const handlePageChange = ({ selected }) => {
+    setSearchParams(
+      toSearchParams({
+        tabName,
+        tagName: contextTagName,
+        pageIndex: selected,
+      })
+    );
   };
 
   return (
@@ -25,6 +31,7 @@ function ArticlesPagination({
       breakLabel="..."
       breakLinkClassName="page-link"
       containerClassName="pagination pagination-sm"
+      forcePage={pageIndex}
       nextClassName="page-item"
       nextLabel={<i className="ion-arrow-right-b"></i>}
       nextLinkClassName="page-link"

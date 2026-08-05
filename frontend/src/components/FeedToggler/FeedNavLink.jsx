@@ -1,10 +1,10 @@
 import { useFeedContext } from "../../context/FeedContext";
 
 function FeedNavLink({ icon, name, text }) {
-  const { tabName, changeTab } = useFeedContext();
+  const { tabName, setFeed } = useFeedContext();
 
-  const handleClick = (e) => {
-    changeTab(e, name);
+  const handleClick = () => {
+    setFeed({ tabName: name });
   };
 
   return (

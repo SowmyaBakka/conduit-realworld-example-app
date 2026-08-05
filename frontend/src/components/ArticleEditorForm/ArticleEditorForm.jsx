@@ -7,12 +7,45 @@ import FormFieldset from "../FormFieldset";
 
 const emptyForm = { title: "", description: "", body: "", tagList: "" };
 
+/**
+ * Normalize error values to an array of human-readable error lines.
+ * Tolerates:
+ *  - string error
+ *  - array of strings
+ *  - object-shaped errors (e.g. { errors: { field: [msg] } } or { field: [msg] })
+ */
+function toErrorLines(err) {
+  if (!err) return [];
+  if (typeof err === 'string') return [err];
+  if (Array.isArray(err)) return err.map(String);
+  
+  // Handle Error objects specifically
+  if (err instanceof Error) {
+    return err.message ? [err.message] : ['Unexpected error occurred'];
+  }
+
+  const obj = err?.errors ?? err;
+  if (obj && typeof obj === 'object') {
+    const entries = Object.entries(obj);
+    if (entries.length === 0) return ['Unexpected error occurred'];
+    
+    return entries.flatMap(([k, v]) => {
+      if (Array.isArray(v)) return v.map((m) => `${k} ${m}`);
+      return [`${k} ${String(v)}`];
+    });
+  }
+
+  return ['Unexpected error occurred'];
+}
+
 function ArticleEditorForm() {
   const { state } = useLocation();
   const [{ title, description, body, tagList }, setForm] = useState(
     state || emptyForm,
   );
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
   const { isAuth, headers, loggedUser } = useAuth();
 
   const navigate = useNavigate();
@@ -48,18 +81,40 @@ function ArticleEditorForm() {
     setForm((form) => ({ ...form, tagList: value.split(/,| /) }));
   };
 
-  const formSubmit = (e) => {
+  const formSubmit = async (e) => {
     e.preventDefault();
 
-    setArticle({ headers, slug, body, description, tagList, title })
-      .then((slug) => navigate(`/article/${slug}`))
-      .catch(setErrorMessage);
+    // Prevent double-submit
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+    setErrorMessage(""); // Clear legacy error message
+
+    try {
+      const articleSlug = await setArticle({ headers, slug, body, description, tagList, title });
+      navigate(`/article/${articleSlug}`);
+    } catch (err) {
+      setSubmitError(err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <form onSubmit={formSubmit}>
       <fieldset>
+        {/* Render error summary if submit failed */}
+        {submitError && (
+          <ul className="error-messages">
+            {toErrorLines(submitError).map((line, idx) => (
+              <li key={`${line}-${idx}`}>{line}</li>
+            ))}
+          </ul>
+        )}
+        {/* Legacy error message (kept for backward compatibility) */}
         {errorMessage && <span className="error-messages">{errorMessage}</span>}
+
         <FormFieldset
           placeholder="Article Title"
           name="title"
@@ -99,8 +154,14 @@ function ArticleEditorForm() {
           <div className="tag-list"></div>
         </FormFieldset>
 
-        <button className="btn btn-lg pull-xs-right btn-primary" type="submit">
-          {slug ? "Update Article" : "Publish Article"}
+        <button
+          className="btn btn-lg pull-xs-right btn-primary"
+          type="submit"
+          disabled={isSubmitting}
+        >
+          {isSubmitting
+            ? (slug ? "Updating…" : "Publishing…")
+            : (slug ? "Update Article" : "Publish Article")}
         </button>
       </fieldset>
     </form>
