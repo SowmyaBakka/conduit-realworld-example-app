@@ -35,6 +35,10 @@ function AuthorInfo() {
       <Avatar alt={username} className="user-img" src={image} />
       <h4>{username}</h4>
 
+      {username === loggedUser.username && loggedUser.email && (
+        <div className="user-email">{loggedUser.email}</div>
+      )}
+
       {bio && <Markdown options={{ forceBlock: true }}>{bio}</Markdown>}
 
       {username === loggedUser.username ? (
