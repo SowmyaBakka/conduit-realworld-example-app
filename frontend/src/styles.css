@@ -15,7 +15,7 @@
  * Pages: home-page, auth-page, settings-page, editor-page, profile-page, article-page
  * Article: article-preview, article-meta, article-content, article-actions, articles-toggle
  * Comments: comment-author, comment-author-img, mod-options, date-posted
- * User: user-info, user-img, user-pic
+ * User: user-info, user-img, user-pic, user-email
  * Misc: banner, logo-font, sidebar, feed-toggle, error-messages, counter,
  *       preview-link, author, date, info, attribution, active, disabled,
  *       pull-xs-right, text-xs-center, empty-feed-message
@@ -1496,6 +1496,14 @@ footer > .container {
 
 .profile-page .user-info h4 {
   font-weight: 700;
+}
+
+.profile-page .user-info .user-email {
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 300;
 }
 
 .profile-page .user-info p {
