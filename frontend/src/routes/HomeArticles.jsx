@@ -4,12 +4,13 @@ import { useFeedContext } from "../context/FeedContext";
 import useArticleList from "../hooks/useArticles";
 
 function HomeArticles() {
-  const { tabName, tagName } = useFeedContext();
+  const { tabName, tagName, pageIndex } = useFeedContext();
 
   const { articles, articlesCount, loading, setArticlesData } = useArticleList({
     location: tabName,
     tabName,
     tagName,
+    page: pageIndex,
   });
 
   return loading ? (
