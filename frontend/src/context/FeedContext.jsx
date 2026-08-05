@@ -24,8 +24,15 @@ function FeedProvider({ children }) {
     setTab({ tabName, tagName });
   };
 
+  const clearTagFilter = () => {
+    if (tabName !== "tag") return;
+
+    const defaultTab = isAuth ? "feed" : "global";
+    setTab({ tabName: defaultTab, tagName: "" });
+  };
+
   return (
-    <FeedContext.Provider value={{ changeTab, tabName, tagName }}>
+    <FeedContext.Provider value={{ changeTab, clearTagFilter, tabName, tagName }}>
       {children}
     </FeedContext.Provider>
   );
