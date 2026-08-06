@@ -1057,6 +1057,36 @@ fieldset[disabled] a.btn {
   background: none;
 }
 
+.tag-default.tag-selected {
+  background-color: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+  font-weight: 500;
+}
+
+.clear-filter {
+  display: block;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0;
+  background: none;
+  border: none;
+  color: var(--brand);
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-align: left;
+  transition: color 300ms ease;
+}
+
+.clear-filter:hover {
+  color: var(--brand-hover);
+  text-decoration: underline;
+}
+
+.clear-filter:focus {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
 ul.tag-list {
   display: inline-block;
 }

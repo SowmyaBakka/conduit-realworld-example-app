@@ -6,6 +6,8 @@ function ArticlesPagination({
   articlesCount,
   location,
   tagName,
+  currentPage,
+  onPageChange,
   updateArticles,
   username,
 }) {
@@ -13,6 +15,7 @@ function ArticlesPagination({
   const { headers } = useAuth();
 
   const handlePageChange = ({ selected: page }) => {
+    onPageChange(page);
     getArticles({ headers, location, page, username, tagName })
       .then(updateArticles)
       .catch(console.error);
@@ -25,6 +28,7 @@ function ArticlesPagination({
       breakLabel="..."
       breakLinkClassName="page-link"
       containerClassName="pagination pagination-sm"
+      forcePage={currentPage}
       nextClassName="page-item"
       nextLabel={<i className="ion-arrow-right-b"></i>}
       nextLinkClassName="page-link"
