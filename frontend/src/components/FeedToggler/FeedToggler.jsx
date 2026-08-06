@@ -4,7 +4,7 @@ import FeedNavLink from "./FeedNavLink";
 
 function FeedToggler() {
   const { isAuth } = useAuth();
-  const { tabName, tagName } = useFeedContext();
+  const { tabName, tagName, clearTagFilter } = useFeedContext();
 
   return (
     <div className="feed-toggle">
@@ -13,7 +13,21 @@ function FeedToggler() {
 
         <FeedNavLink name="global" text="Global Feed" />
 
-        {tabName === "tag" && <FeedNavLink icon name="tag" text={tagName} />}
+        {tabName === "tag" && (
+          <>
+            <FeedNavLink icon name="tag" text={tagName} />
+            <li className="nav-item">
+              <button
+                type="button"
+                className="nav-link"
+                onClick={clearTagFilter}
+                aria-label="Clear tag filter"
+              >
+                <i className="ion-close-round"></i>
+              </button>
+            </li>
+          </>
+        )}
       </ul>
     </div>
   );
